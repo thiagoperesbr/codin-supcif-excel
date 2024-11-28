@@ -1,4 +1,5 @@
-import { ArrowUpRight, Building2 } from 'lucide-react'
+import dayjs from 'dayjs'
+import { ArrowUpRight, ListOrdered, Mail } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
@@ -20,12 +21,13 @@ import {
 } from '@/components/ui/table'
 import api from '@/config/api'
 
+import EmailsTableRow from './emails-table-row'
 import SummaryCard from './summary-card'
-import TransactionTableRow from './transactions-table-row'
 
 export function Dashboard() {
   const [emails, setEmails] = useState([])
   const [totalRespondido, setTotalRespondido] = useState('')
+  const [totalPedidoEnquadramento, setTotalPedidoEnquadramento] = useState('')
 
   useEffect(() => {
     getEmails()
@@ -36,8 +38,32 @@ export function Dashboard() {
       const response = await api.get('/api/acompanhamento')
 
       if (response && response.data && response.data.emails) {
-        setEmails(response.data.emails)
+        const emailData = response.data.emails
+        setEmails(emailData)
         setTotalRespondido(response.data.total)
+
+        const countPedidoEnquadramento = emailData.filter(
+          (email) => email['Solicitação'] === 'Pedido de Enquadramento',
+        ).length
+
+        setTotalPedidoEnquadramento(countPedidoEnquadramento)
+
+        const isFriday = dayjs().day() === 5
+        const currentDate = dayjs().format('YYYY-MM-DD')
+
+        if (isFriday) {
+          const logResponse = await api.get(`/api/logs/${currentDate}`)
+          const alreadySaved = logResponse.data.saved
+
+          if (!alreadySaved) {
+            await api.post('/api/emails/create', { emails: emailData })
+
+            await api.post('/api/logs/create', {
+              date: currentDate,
+              saved: true,
+            })
+          }
+        }
       } else {
         console.log('Invalid response data.')
       }
@@ -56,9 +82,15 @@ export function Dashboard() {
 
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
-            icon={<Building2 size={20} />}
+            icon={<Mail size={20} />}
             title="Total de e-mails respondidos"
             amount={totalRespondido}
+          />
+
+          <SummaryCard
+            icon={<ListOrdered size={20} />}
+            title="Pedidos de Enquadramento"
+            amount={totalPedidoEnquadramento}
           />
         </div>
 
@@ -98,7 +130,7 @@ export function Dashboard() {
                 </TableHeader>
                 <TableBody>
                   {emails.slice(0, 5).map((email, index) => (
-                    <TransactionTableRow
+                    <EmailsTableRow
                       key={index}
                       dtSolicitacao={new Date(
                         email['Data da solicitação'],
@@ -106,7 +138,7 @@ export function Dashboard() {
                       solicitacao={email['Solicitação']}
                       duvida={email['Dúvida']}
                       nomeEmpresa={email['Nome da empresa']}
-                      cnpj={email['CNPJ']}
+                      cnpj={email.CNPJ}
                       dtResposta={new Date(
                         email['Data da resposta'],
                       ).toLocaleDateString()}

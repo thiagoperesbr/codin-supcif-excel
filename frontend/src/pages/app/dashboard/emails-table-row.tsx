@@ -1,6 +1,6 @@
 import { TableCell, TableRow } from '@/components/ui/table'
 
-interface TransactionTableRowProps {
+interface EmailsTableRowProps {
   dtSolicitacao: string
   solicitacao: string
   duvida: string
@@ -10,7 +10,7 @@ interface TransactionTableRowProps {
   processoSEI: string
 }
 
-const TransactionTableRow = ({
+const EmailsTableRow = ({
   dtSolicitacao,
   solicitacao,
   duvida,
@@ -18,7 +18,7 @@ const TransactionTableRow = ({
   cnpj,
   dtResposta,
   processoSEI,
-}: TransactionTableRowProps) => {
+}: EmailsTableRowProps) => {
   return (
     <TableRow>
       <TableCell>
@@ -34,4 +34,4 @@ const TransactionTableRow = ({
   )
 }
 
-export default TransactionTableRow
+export default EmailsTableRow

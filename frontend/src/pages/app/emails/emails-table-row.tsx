@@ -6,7 +6,27 @@ import { TableCell, TableRow } from '@/components/ui/table'
 
 import { FileDetails } from './file-details'
 
-export function FileTableRow() {
+interface EmailTableRowProps {
+  userId: string
+  dataSolicitacao: Date
+  solicitacao: string
+  duvida: string
+  nomeEmpresa: string
+  cnpj: string
+  dataResposta: Date
+  processoSei: string
+}
+
+const EmailTableRow = ({
+  userIdtring,
+  dataSolicitacao,
+  solicitacao,
+  duvida,
+  nomeEmpresa,
+  cnpj,
+  dataResposta,
+  processoSei,
+}: EmailTableRowProps) => {
   return (
     <TableRow>
       <TableCell>
@@ -14,7 +34,7 @@ export function FileTableRow() {
           <DialogTrigger asChild>
             <Button variant="outline" size="xs">
               <Search className="h-3 w-3" />
-              <span className="sr-only">Detalhes do arquivo</span>
+              <span className="sr-only">Detalhes do email</span>
             </Button>
           </DialogTrigger>
 
@@ -22,17 +42,14 @@ export function FileTableRow() {
         </Dialog>
       </TableCell>
       <TableCell className="font-mono text-xs font-medium">
-        01ARZ3NDEKTSV4RRFFQ69G5FAV
+        {dataSolicitacao}
       </TableCell>
-      <TableCell className="text-muted-foreground">há 15 minutos</TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-slate-300" />
-          <span className="font-medium text-muted-foreground">Pendente</span>
-        </div>
-      </TableCell>
-      <TableCell className="font-medium">Consórcio Térmica do Açu</TableCell>
-      <TableCell className="font-medium">1.8 MB</TableCell>
+      <TableCell className="text-muted-foreground">{solicitacao}</TableCell>
+      <TableCell className="font-medium">{duvida}</TableCell>
+      <TableCell className="font-medium">{nomeEmpresa}</TableCell>
+      <TableCell className="font-medium">{cnpj}</TableCell>
+      <TableCell className="font-medium">{dataResposta}</TableCell>
+      <TableCell className="font-medium">{processoSei}</TableCell>
       <TableCell>
         <Button variant="outline" size="xs">
           <ArrowRight className="h-3 w-3 mr-2" />
@@ -48,3 +65,5 @@ export function FileTableRow() {
     </TableRow>
   )
 }
+
+export default EmailTableRow

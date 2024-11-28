@@ -2,12 +2,12 @@ import nodemailer from "nodemailer";
 
 export const configEmail = async (sentFrom, sendTo, subject, message) => {
   const transporter = nodemailer.createTransport({
-    host: "smtps2.webmail.rj.gov.br",
-    port: 465,
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
     secure: true,
     auth: {
-      user: "tperes@codin.rj.gov.br",
-      pass: "Deinf00",
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   });
 

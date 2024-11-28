@@ -3,7 +3,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from './pages/_layouts/app'
 import { NotFound } from './pages/404'
 import { Dashboard } from './pages/app/dashboard/dashboard'
-import { Files } from './pages/app/files/files'
+import { Emails } from './pages/app/emails/emails'
 
 export const router = createBrowserRouter([
   {
@@ -12,7 +12,7 @@ export const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { path: '/', element: <Dashboard /> },
-      { path: '/emails', element: <Files /> },
+      { path: '/emails', element: <Emails /> },
     ],
   },
 

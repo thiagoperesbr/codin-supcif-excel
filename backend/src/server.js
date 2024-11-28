@@ -1,12 +1,20 @@
+import * as dotenv from "dotenv";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import cron from "node-cron";
+import mongoose from "mongoose";
 
 import acompanhamentoRoute from "./routes/acompanhamentoRouter.js";
+import logsRoute from "./routes/logsRouter.js";
+import emailsRoute from "./routes/emailsRouter.js";
 
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import { enviarEmail } from "./utils/enviarEmail.js";
+
+dotenv.config();
+
+const PORT = process.env.PORT || 8800;
 
 const app = express();
 
@@ -21,6 +29,8 @@ app.use(
 );
 
 app.use("/api/acompanhamento/", acompanhamentoRoute);
+app.use("/api/logs/", logsRoute);
+app.use("/api/emails/", emailsRoute);
 
 app.use(errorHandler);
 
@@ -28,6 +38,15 @@ cron.schedule("0 10 * * 5", () => {
   enviarEmail();
 });
 
-app.listen(8800, () => {
-  console.log("Server running on port 8800");
+mongoose
+  .connect(process.env.MONGODB_URL)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT} - MongoDB connected.`);
+    });
+  })
+  .catch((err) => console.log(err));
+
+mongoose.connection.on("disconnected", () => {
+  console.log("MongoDB disconnected.");
 });
