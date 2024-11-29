@@ -1,4 +1,5 @@
 import Logs from "../models/Logs.js";
+import dayjs from "dayjs";
 
 export const createLog = async (req, res, next) => {
   try {
@@ -10,7 +11,7 @@ export const createLog = async (req, res, next) => {
       });
     }
 
-    const logDate = new Date(date).setHours(0, 0, 0, 0);
+    const logDate = dayjs(date).startOf("day").toDate();
 
     const existingLog = await Logs.findOne({ date: logDate });
 
@@ -47,19 +48,20 @@ export const getLogByDate = async (req, res, next) => {
       });
     }
 
-    const logDate = new Date(date).setHours(0, 0, 0, 0);
+    const logDate = dayjs(date).startOf("day").toDate();
 
     const log = await Logs.findOne({ date: logDate });
 
+    let saved;
+
     if (!log) {
-      return res.status(404).json({
-        message: "Nenhum log encontrado para esta data.",
-      });
+      saved = false;
+    } else {
+      saved = log.saved;
     }
 
     res.status(200).json({
-      message: "Log encontrado.",
-      log,
+      saved,
     });
   } catch (err) {
     next(err);

@@ -15,13 +15,4 @@ export const router = createBrowserRouter([
       { path: '/emails', element: <Emails /> },
     ],
   },
-
-  /*   {
-    path: '/',
-    element: <AuthLayout />,
-    children: [
-      { path: '/login', element: <SignIn /> },
-      { path: '/register', element: <SignUp /> },
-    ],
-  }, */
 ])

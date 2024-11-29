@@ -1,8 +1,9 @@
 import Emails from "../models/Emails.js";
+import dayjs from "dayjs";
 
 export const createEmails = async (req, res, next) => {
   try {
-    const { emails } = req.body;
+    const { emails, date } = req.body;
 
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return res
@@ -10,13 +11,32 @@ export const createEmails = async (req, res, next) => {
         .json({ message: "A lista de e-mails é obrigatória." });
     }
 
-    if (!emails.every((email) => email.data)) {
+    if (!date) {
       return res.status(400).json({
-        message: "Todos os e-mails devem conter a propriedade 'data'.",
+        message: "A data é obrigatória.",
       });
     }
 
-    const newEmails = await Emails.insertMany(emails);
+    const logDate = dayjs(date).startOf("day").toDate();
+
+    console.log(logDate);
+
+    const existingEmails = await Emails.find({ data: logDate });
+
+    console.log(existingEmails);
+
+    if (existingEmails.length > 0) {
+      return res.status(400).json({
+        message: "E-mails já foram salvos",
+      });
+    }
+
+    const emailsWithDate = emails.map((email) => ({
+      ...email,
+      data: logDate,
+    }));
+
+    const newEmails = await Emails.insertMany(emailsWithDate);
 
     res.status(201).json({
       message: "E-mails salvos com sucesso.",

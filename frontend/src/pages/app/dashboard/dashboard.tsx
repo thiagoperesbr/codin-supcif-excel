@@ -28,12 +28,16 @@ export function Dashboard() {
   const [emails, setEmails] = useState([])
   const [totalRespondido, setTotalRespondido] = useState('')
   const [totalPedidoEnquadramento, setTotalPedidoEnquadramento] = useState('')
+  const [emailsSaved, setEmailsSaved] = useState(false)
 
   useEffect(() => {
     getEmails()
   }, [])
 
   const getEmails = async () => {
+    console.log(emailsSaved)
+    if (emailsSaved) return
+
     try {
       const response = await api.get('/api/acompanhamento')
 
@@ -43,7 +47,7 @@ export function Dashboard() {
         setTotalRespondido(response.data.total)
 
         const countPedidoEnquadramento = emailData.filter(
-          (email) => email['Solicitação'] === 'Pedido de Enquadramento',
+          (email) => email['Solicitação'] === 'Pedido de Abertura de processo',
         ).length
 
         setTotalPedidoEnquadramento(countPedidoEnquadramento)
@@ -53,15 +57,23 @@ export function Dashboard() {
 
         if (isFriday) {
           const logResponse = await api.get(`/api/logs/${currentDate}`)
-          const alreadySaved = logResponse.data.saved
 
-          if (!alreadySaved) {
-            await api.post('/api/emails/create', { emails: emailData })
+          if (!logResponse.data.saved) {
+            try {
+              await api.post('/api/emails/create', {
+                emails: emailData,
+                date: currentDate,
+              })
 
-            await api.post('/api/logs/create', {
-              date: currentDate,
-              saved: true,
-            })
+              await api.post('/api/logs/create', {
+                date: currentDate,
+                saved: true,
+              })
+
+              setEmailsSaved(true)
+            } catch (err) {
+              console.error('Erro ao salvar os emails e o log', err)
+            }
           }
         }
       } else {
@@ -89,7 +101,7 @@ export function Dashboard() {
 
           <SummaryCard
             icon={<ListOrdered size={20} />}
-            title="Pedidos de Enquadramento"
+            title="Pedidos de Abertura de processo"
             amount={totalPedidoEnquadramento}
           />
         </div>
