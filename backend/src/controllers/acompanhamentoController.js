@@ -4,13 +4,12 @@ import * as path from "path";
 export const getAcompanhamentos = async (req, res, next) => {
   try {
     const networkPath = path.join(
-      "\\\\columbia",
-      "backup",
-      "gerenciais",
-      "dirif",
-      "dirif - sups",
-      "01. supcif",
-      "01. acompanhamento processual",
+      "D:",
+      "www",
+      "codin-supcif-excel",
+      "backend",
+      "src",
+      "excel",
       "01. acompanhamento dos emails.xlsx"
     );
 
@@ -20,11 +19,8 @@ export const getAcompanhamentos = async (req, res, next) => {
 
     const data = xlsx.utils.sheet_to_json(ws);
 
-    const count = data.length;
-
     res.status(200).json({
       emails: data,
-      total: count,
     });
   } catch (err) {
     next(err);

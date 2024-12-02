@@ -2,15 +2,14 @@ import mongoose from "mongoose";
 
 const EmailsSchema = new mongoose.Schema(
   {
-    data: {
-      type: Date,
-      required: true,
-    },
     origem: {
       type: String,
     },
     dataSolicitacao: {
       type: Date,
+    },
+    dia: {
+      type: String,
     },
     semanaSolicitacao: {
       type: String,
@@ -37,19 +36,39 @@ const EmailsSchema = new mongoose.Schema(
       type: String,
     },
     dataResposta: {
-      type: String,
+      type: Date,
     },
-    semanaReposta: {
+    dias: {
+      type: Number,
+    },
+    semanaResposta: {
       type: String,
     },
     acao: {
       type: String,
     },
-    processoSei: {
+    processoSEI: {
       type: String,
     },
   },
   { timestamps: true }
+);
+
+EmailsSchema.index(
+  {
+    origem: 1,
+    dataSolicitacao: 1,
+    dia: 1,
+    semanaSolicitacao: 1,
+    solicitacao: 1,
+    nomeEmpresa: 1,
+    dataResposta: 1,
+    dias: 1,
+    semanaResposta: 1,
+    acao: 1,
+    processoSEI: 1,
+  },
+  { unique: true }
 );
 
 export default mongoose.model("Emails", EmailsSchema);

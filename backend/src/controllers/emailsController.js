@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 
 export const createEmails = async (req, res, next) => {
   try {
-    const { emails, date } = req.body;
+    const { emails } = req.body;
 
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return res
@@ -11,37 +11,47 @@ export const createEmails = async (req, res, next) => {
         .json({ message: "A lista de e-mails é obrigatória." });
     }
 
-    if (!date) {
-      return res.status(400).json({
-        message: "A data é obrigatória.",
-      });
-    }
-
-    const logDate = dayjs(date).startOf("day").toDate();
-
-    console.log(logDate);
-
-    const existingEmails = await Emails.find({ data: logDate });
-
-    console.log(existingEmails);
-
-    if (existingEmails.length > 0) {
-      return res.status(400).json({
-        message: "E-mails já foram salvos",
-      });
-    }
-
-    const emailsWithDate = emails.map((email) => ({
-      ...email,
-      data: logDate,
+    const emailsWithFormattedFields = emails.map((email) => ({
+      origem: email["Origem"] || "",
+      dataSolicitacao: email["Data da solicitação"]
+        ? dayjs(email["Data da solicitação"]).startOf("day").toDate()
+        : null,
+      dia: email["Dia"] || "",
+      semanaSolicitacao: email["Semana da Solicitação"] || "",
+      solicitacao: email["Solicitação"] || "",
+      duvida: email["Dúvida"] || "",
+      duvidaDetalhamento: email["Dúvidas - Detalhamento"] || "",
+      nomeEmpresa: email["Nome da empresa"] || "",
+      cnpj: email["CNPJ"] || "",
+      leiDecreto: email["Lei/Decreto"] || "",
+      setor: email["Setor"] || "",
+      dataResposta: email["Data da resposta"]
+        ? dayjs(email["Data da resposta"]).startOf("day").toDate()
+        : null,
+      dias: email["Dias"] || null,
+      semanaResposta: email["Semana da Resposta"] || "",
+      acao: email["Ação"] || "",
+      processoSEI: email["Processo SEI"] || "",
     }));
 
-    const newEmails = await Emails.insertMany(emailsWithDate);
+    try {
+      const newEmails = await Emails.insertMany(emailsWithFormattedFields, {
+        ordered: false,
+      });
 
-    res.status(201).json({
-      message: "E-mails salvos com sucesso.",
-      emails: newEmails,
-    });
+      res.status(201).json({
+        message: "E-mails salvos com sucesso.",
+        emails: newEmails,
+      });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({
+          message: "Alguns e-maisls já existem no banco de dados",
+          error: err.writeErrors,
+        });
+      }
+      throw err;
+    }
   } catch (err) {
     next(err);
   }
@@ -49,22 +59,19 @@ export const createEmails = async (req, res, next) => {
 
 export const getEmails = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 0;
-    const limit = parseInt(req.query.limit) || 10;
+    const { page, limit } = req.query;
 
-    if (page < 0 || limit <= 10) {
-      return res.status(404).json({
-        message: "Os parâmetros de paginação são inválidos.",
-      });
-    }
+    const pageIndex = page ? parseInt(page, 10) : 0;
+    const perPage = limit ? parseInt(limit, 10) : 25;
 
     const totalCount = await Emails.countDocuments();
 
     const emails = await Emails.find()
-      .skip(page * limit)
-      .limit(limit);
+      .sort({ _id: 1 })
+      .skip(pageIndex * perPage)
+      .limit(perPage);
 
-    if (emails.length === 0) {
+    if (totalCount === 0) {
       return res.status(400).json({
         message: "Nenhum email foi encontrado.",
         emails: [],
@@ -75,6 +82,68 @@ export const getEmails = async (req, res, next) => {
     res.status(200).json({
       emails,
       totalCount,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getLatestEmails = async (req, res, next) => {
+  try {
+    const { semanaResposta } = req.query;
+
+    const query = semanaResposta
+      ? { semanaResposta: new RegExp(`^${semanaResposta}$`, "i") }
+      : {};
+
+    const totalEmailsCount = await Emails.countDocuments(query);
+
+    const countsBySolicitacao = await Emails.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: "$solicitacao",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const emails = await Emails.find(query).sort({ _id: -1 }).limit(10);
+
+    const reversedEmails = emails.reverse();
+
+    const countPedidoAberturaProcesso =
+      countsBySolicitacao.find(
+        (item) => item._id === "Pedido de Abertura de processo"
+      )?.count || 0;
+
+    const countPedidoTacito =
+      countsBySolicitacao.find((item) => item._id === "Pedido Tácito")?.count ||
+      0;
+
+    if (totalEmailsCount === 0) {
+      return res.status(400).json({
+        message: "Nenhum email foi encontrado.",
+      });
+    }
+
+    res.status(200).json({
+      emails: reversedEmails,
+      totalCount: totalEmailsCount,
+      countPedidoAberturaProcesso,
+      countPedidoTacito,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getEmailById = async (req, res, next) => {
+  try {
+    const email = await Emails.findById(req.params.id);
+
+    res.status(200).json({
+      email,
     });
   } catch (err) {
     next(err);

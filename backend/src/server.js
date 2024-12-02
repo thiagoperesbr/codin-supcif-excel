@@ -6,7 +6,6 @@ import cron from "node-cron";
 import mongoose from "mongoose";
 
 import acompanhamentoRoute from "./routes/acompanhamentoRouter.js";
-import logsRoute from "./routes/logsRouter.js";
 import emailsRoute from "./routes/emailsRouter.js";
 
 import { errorHandler } from "./middlewares/errorMiddleware.js";
@@ -29,7 +28,6 @@ app.use(
 );
 
 app.use("/api/acompanhamento/", acompanhamentoRoute);
-app.use("/api/logs/", logsRoute);
 app.use("/api/emails/", emailsRoute);
 
 app.use(errorHandler);

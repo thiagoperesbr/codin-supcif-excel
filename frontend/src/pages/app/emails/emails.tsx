@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 
@@ -11,25 +12,33 @@ import {
 } from '@/components/ui/table'
 import api from '@/config/api'
 
-// import { FileTableFilters } from './file-table-filters'
 import EmailsTableRow from './emails-table-row'
 
 interface Email {
   _id: string
-  dataSolicitacao: Date
+  origem: string
+  dataSolicitacao: string
+  dia: string
+  semanaSolicitacao: string
   solicitacao: string
   duvida: string
+  duvidaDetalhamento: string
   nomeEmpresa: string
   cnpj: string
-  dataResposta: Date
-  processoSei: string
+  leiDecreto: string
+  setor: string
+  dataResposta: string
+  dias: string
+  semanaResposta: string
+  acao: string
+  processoSEI: string
 }
 
 export function Emails() {
   const [emails, setEmails] = useState<Email[]>([])
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
-  const perPage = 10
+  const perPage = 25
 
   const fetchEmails = async (pageIndex: number) => {
     try {
@@ -61,6 +70,7 @@ export function Emails() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead></TableHead>
                   <TableHead>Dt. Solicitação</TableHead>
                   <TableHead>Solicitação</TableHead>
                   <TableHead>Dúvida</TableHead>
@@ -68,20 +78,24 @@ export function Emails() {
                   <TableHead>CNPJ</TableHead>
                   <TableHead>Dt. Resposta</TableHead>
                   <TableHead>Processo SEI</TableHead>
-                  <TableHead></TableHead>
-                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {emails.map((email) => (
                   <EmailsTableRow
                     key={email._id}
-                    dataSolicitacao={email.dataSolicitacao}
+                    emailID={email._id}
+                    dataSolicitacao={dayjs(email.dataSolicitacao).format(
+                      'DD/MM/YYYY',
+                    )}
+                    solicitacao={email.solicitacao}
                     duvida={email.duvida}
                     nomeEmpresa={email.nomeEmpresa}
                     cnpj={email.cnpj}
-                    dataResposta={email.dataResposta}
-                    processoSei={email.processoSei}
+                    dataResposta={dayjs(email.dataResposta).format(
+                      'DD/MM/YYYY',
+                    )}
+                    processoSEI={email.processoSEI}
                   />
                 ))}
               </TableBody>

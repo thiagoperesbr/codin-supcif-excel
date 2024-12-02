@@ -1,66 +1,107 @@
-import { ArrowRight, Search, Trash } from 'lucide-react'
+import { Search } from 'lucide-react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { TableCell, TableRow } from '@/components/ui/table'
+import api from '@/config/api'
 
-import { FileDetails } from './file-details'
+import EmailDetails from './email-details'
+
+interface Email {
+  _id: string
+  origem: string
+  dataSolicitacao: string
+  dia: string
+  semanaSolicitacao: string
+  solicitacao: string
+  duvida: string
+  duvidaDetalhamento: string
+  nomeEmpresa: string
+  cnpj: string
+  leiDecreto: string
+  setor: string
+  dataResposta: string
+  dias: string
+  semanaResposta: string
+  acao: string
+  processoSEI: string
+}
 
 interface EmailTableRowProps {
-  userId: string
-  dataSolicitacao: Date
+  emailID: string
+  dataSolicitacao: string
   solicitacao: string
   duvida: string
   nomeEmpresa: string
   cnpj: string
-  dataResposta: Date
-  processoSei: string
+  dataResposta: string
+  processoSEI: string
 }
 
 const EmailTableRow = ({
-  userIdtring,
+  emailID,
   dataSolicitacao,
   solicitacao,
   duvida,
   nomeEmpresa,
   cnpj,
   dataResposta,
-  processoSei,
+  processoSEI,
 }: EmailTableRowProps) => {
+  const [emailDetails, setEmailDetails] = useState<Email | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+
+  const getEmailDetails = async () => {
+    setLoading(true)
+
+    try {
+      const response = await api.get(`/api/emails/${emailID}`)
+
+      console.log(response.data.email)
+
+      setEmailDetails(response.data.email)
+    } catch (err) {
+      console.error('Erro ao buscar email', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <TableRow>
       <TableCell>
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" size="xs">
+            <Button onClick={getEmailDetails} variant="outline" size="xs">
               <Search className="h-3 w-3" />
-              <span className="sr-only">Detalhes do email</span>
+              <span className="sr-only">Detalhes do e-mail</span>
             </Button>
           </DialogTrigger>
 
-          <FileDetails />
+          <EmailDetails emailDetails={emailDetails} loading={loading} />
         </Dialog>
       </TableCell>
       <TableCell className="font-mono text-xs font-medium">
         {dataSolicitacao}
       </TableCell>
-      <TableCell className="text-muted-foreground">{solicitacao}</TableCell>
-      <TableCell className="font-medium">{duvida}</TableCell>
-      <TableCell className="font-medium">{nomeEmpresa}</TableCell>
-      <TableCell className="font-medium">{cnpj}</TableCell>
-      <TableCell className="font-medium">{dataResposta}</TableCell>
-      <TableCell className="font-medium">{processoSei}</TableCell>
-      <TableCell>
-        <Button variant="outline" size="xs">
-          <ArrowRight className="h-3 w-3 mr-2" />
-          Aprovar
-        </Button>
+      <TableCell className="font-mono text-xs font-medium text-muted-foreground">
+        {solicitacao}
       </TableCell>
-      <TableCell>
-        <Button variant="outline" size="xs">
-          <Trash className="h-3 w-3 mr-2" />
-          Excluir
-        </Button>
+      <TableCell className="font-mono text-xs font-medium">
+        {duvida || '-'}
+      </TableCell>
+      <TableCell className="font-mono text-xs font-medium text-muted-foreground uppercase">
+        {nomeEmpresa}
+      </TableCell>
+      <TableCell className="font-mono text-xs font-medium">
+        {cnpj || '-'}
+      </TableCell>
+      <TableCell className="font-mono text-xs font-medium text-muted-foreground">
+        {dataResposta}
+      </TableCell>
+      <TableCell className="font-mono text-xs font-medium">
+        {processoSEI}
       </TableCell>
     </TableRow>
   )

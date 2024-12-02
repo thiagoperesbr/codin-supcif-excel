@@ -1,35 +1,43 @@
 import { TableCell, TableRow } from '@/components/ui/table'
 
 interface EmailsTableRowProps {
-  dtSolicitacao: string
+  dataSolicitacao: string
   solicitacao: string
   duvida: string
   nomeEmpresa: string
   cnpj: string
-  dtResposta: string
+  dataResposta: string
   processoSEI: string
 }
 
 const EmailsTableRow = ({
-  dtSolicitacao,
+  dataSolicitacao,
   solicitacao,
   duvida,
   nomeEmpresa,
   cnpj,
-  dtResposta,
+  dataResposta,
   processoSEI,
 }: EmailsTableRowProps) => {
   return (
     <TableRow>
       <TableCell>
-        <div className="font-medium">{dtSolicitacao}</div>
+        <div className="font-mono text-xs font-medium">{dataSolicitacao}</div>
       </TableCell>
-      <TableCell>{solicitacao}</TableCell>
-      <TableCell>{duvida}</TableCell>
-      <TableCell className="uppercase">{nomeEmpresa}</TableCell>
-      <TableCell>{cnpj}</TableCell>
-      <TableCell>{dtResposta}</TableCell>
-      <TableCell>{processoSEI}</TableCell>
+      <TableCell className="font-mono text-xs font-medium text-muted-foreground">
+        {solicitacao}
+      </TableCell>
+      <TableCell className="font-mono text-xs font-medium">{duvida}</TableCell>
+      <TableCell className="font-mono text-xs font-medium text-muted-foreground uppercase">
+        {nomeEmpresa}
+      </TableCell>
+      <TableCell className="font-mono text-xs font-medium">{cnpj}</TableCell>
+      <TableCell className="font-mono text-xs font-medium text-muted-foreground">
+        {dataResposta}
+      </TableCell>
+      <TableCell className="font-mono text-xs font-medium">
+        {processoSEI}
+      </TableCell>
     </TableRow>
   )
 }
