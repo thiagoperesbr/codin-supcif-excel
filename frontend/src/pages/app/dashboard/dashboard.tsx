@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/table'
 import api from '@/config/api'
 
+import AiReportButton from './ai-report-button'
 import EmailsTableRow from './emails-table-row'
 import SummaryCard from './summary-card'
 
@@ -206,10 +207,11 @@ export function Dashboard() {
           </h1>
 
           <div className="ml-auto gap-2 flex flex-row">
-            <div>
+            <div className="flex items-center gap-3">
+              <AiReportButton />
               <Select onValueChange={handleWeekChange} value={selectedWeek}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Semana" value={selectedWeek} />
+                <SelectTrigger className="w-[170px]">
+                  <SelectValue placeholder="Semana" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 52 }, (_, i) => {
