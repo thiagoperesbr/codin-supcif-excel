@@ -10,6 +10,7 @@ import emailsRoute from "./routes/emailsRouter.js";
 
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import { enviarEmail } from "./utils/enviarEmail.js";
+import { generateMonthlyReport } from "./utils/generateMonthlyReport.js";
 
 dotenv.config();
 
@@ -34,6 +35,18 @@ app.use(errorHandler);
 
 cron.schedule("0 10 * * 5", () => {
   enviarEmail();
+});
+
+cron.schedule("0 19 28-31 * * ", async () => {
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  if (now.getDate() === lastDay) {
+    try {
+      await generateMonthlyReport();
+    } catch (err) {
+      console.error("Erro ao gerar relatório mensal: ", err);
+    }
+  }
 });
 
 mongoose
