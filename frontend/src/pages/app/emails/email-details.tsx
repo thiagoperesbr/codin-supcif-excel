@@ -42,12 +42,12 @@ const EmailDetails = ({ emailDetails, loading }: EmailDetailsProps) => {
   }
 
   return (
-    <DialogContent>
+    <DialogContent className="h-[90%] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Detalhes do E-mail</DialogTitle>
       </DialogHeader>
 
-      <div className="space-y-6">
+      <div>
         <Table>
           <TableBody>
             <TableRow>

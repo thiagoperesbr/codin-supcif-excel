@@ -34,34 +34,36 @@ const generatePrompt = (currentData, lastMonthData, startDate, endDate) => {
   return `Relatório Mensal de E-mails (${dayjs(startDate).format(
     "DD/MM/YYYY"
   )} a ${dayjs(endDate).format("DD/MM/YYYY")})
+  
+  Resumo Geral
 
-  **Resumo Geral**
-  - Total de e-mails recebidos: ${geral.totalRecebidos || 0}.
-  - Total de e-mails respondidos: ${geral.totalRespondidos || 0}.
-  - Tempo médio de resposta: ${
+  Total de e-mails recebidos: ${geral.totalRecebidos || 0}.
+  Total de e-mails respondidos: ${geral.totalRespondidos || 0}.
+  Tempo médio de resposta: ${
     geral.tempoMedio ? geral.tempoMedio.toFixed(2) : "0"
   } dias.
-  - Taxa de crescimento no volume de e-mails (comparado ao mês anterior): ${growthRate.toFixed(
+  Taxa de crescimento no volume de e-mails (comparado ao mês anterior): ${growthRate.toFixed(
     2
   )}%.
   
-  **Classificação dos E-mails**
-  Categorias:
+  Classificação dos E-mails
+
+  Categorias mais Solicitadas
   ${categorias}
 
-  Dúvidas mais recorrentes:
+  Dúvidas mais recorrentes
   ${duvidas}
 
-  **Setores Mais Envolvidos**
+  Setores mais Envolvidos
   ${setores}
 
-  **Empresas com Maior Frequência**
+  Empresas com maior frequência
   ${empresas}
 
-  **Origens dos E-mails**
+  Origens dos e-mails
   ${origens}
 
-  **Leis e Decretos mais Citados**
+  Leis e Decretos mais citados
   ${leis}
     `;
 };

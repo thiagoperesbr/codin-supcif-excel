@@ -5,6 +5,7 @@ import {
   getEmailById,
   getEmails,
   getLatestEmails,
+  getMonthlyTotals,
 } from "../controllers/emailsController.js";
 
 const router = express.Router();
@@ -12,6 +13,7 @@ const router = express.Router();
 router.post("/create", createEmails);
 router.get("/latest", getLatestEmails);
 router.get("/", getEmails);
-router.get("/:id", getEmailById);
+router.get("/id/:id", getEmailById);
+router.get("/monthly-totals", getMonthlyTotals);
 
 export default router;

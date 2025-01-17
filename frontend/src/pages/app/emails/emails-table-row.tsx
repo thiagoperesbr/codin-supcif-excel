@@ -56,9 +56,7 @@ const EmailTableRow = ({
     setLoading(true)
 
     try {
-      const response = await api.get(`/api/emails/${emailID}`)
-
-      console.log(response.data.email)
+      const response = await api.get(`/api/emails/id/${emailID}`)
 
       setEmailDetails(response.data.email)
     } catch (err) {
@@ -73,7 +71,7 @@ const EmailTableRow = ({
       <TableCell>
         <Dialog>
           <DialogTrigger asChild>
-            <Button onClick={getEmailDetails} variant="outline" size="xs">
+            <Button onClick={getEmailDetails} variant="outline" size="sm">
               <Search className="h-3 w-3" />
               <span className="sr-only">Detalhes do e-mail</span>
             </Button>

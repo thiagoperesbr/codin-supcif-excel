@@ -1,3 +1,4 @@
+import axios from 'axios'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import { ArrowUpRight, ListOrdered, Mail } from 'lucide-react'
@@ -5,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 
+// import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from 'recharts'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -13,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+// import { ChartConfig, ChartContainer } from '@/components/ui/chart'
 import {
   Select,
   SelectContent,
@@ -29,7 +32,7 @@ import {
 } from '@/components/ui/table'
 import api from '@/config/api'
 
-import AiReportButton from './ai-report-button'
+// import AiReportButton from './ai-report-button'
 import EmailsTableRow from './emails-table-row'
 import SummaryCard from './summary-card'
 
@@ -54,16 +57,24 @@ interface Email {
 
 dayjs.extend(weekOfYear)
 
+// const chartConfig = {
+//   total: {
+//     label: 'Total',
+//   },
+// } satisfies ChartConfig
+
 export function Dashboard() {
   const [emails, setEmails] = useState<Email[]>([])
+  // const [chartData, setChartData] = useState<
+  //   { month: string; total: number }[]
+  // >([])
   const [totalRespondido, setTotalRespondido] = useState('0')
   const [totalPedidoAberturaProcesso, setTotalPedidoAberturaProcesso] =
     useState('0')
   const [totalPedidoTacito, setTotalPedidoTacito] = useState('0')
   const [noData, setNoData] = useState(false)
-  const [selectedWeek, setSelectedWeek] = useState<string>(
-    `${dayjs().year()}-${String(dayjs().week()).padStart(2, '0')}`,
-  )
+  const [selectedYear, setSelectedYear] = useState<number>(dayjs().year())
+  const [selectedWeek, setSelectedWeek] = useState<string>('01')
 
   const calculateTargetWeek = (): string => {
     const today = dayjs()
@@ -94,11 +105,13 @@ export function Dashboard() {
     let isMounted = true
 
     const initializeDashboard = async () => {
-      const isSunday = dayjs().day() === 0
+      const isFriday = dayjs().day() === 6
       const targetWeek = calculateTargetWeek()
-      setSelectedWeek(targetWeek)
+      const [targetYear, targetWeekNumber] = targetWeek.split('-')
+      setSelectedYear(Number(targetYear))
+      setSelectedWeek(targetWeekNumber)
 
-      if (isSunday) {
+      if (isFriday) {
         const excelData = await getExcel()
 
         if (excelData && isMounted) {
@@ -106,13 +119,16 @@ export function Dashboard() {
 
           if (saveSuccess && isMounted) {
             await getEmails(targetWeek)
+            // await getMonthlyEmailTotals()
           } else if (isMounted) {
             console.log('Nenhum e-mail foi salvo. Atualizando a lista.')
             await getEmails(targetWeek)
+            // await getMonthlyEmailTotals()
           }
         }
       } else if (isMounted) {
         await getEmails(targetWeek)
+        // await getMonthlyEmailTotals()
       }
     }
 
@@ -123,9 +139,16 @@ export function Dashboard() {
     }
   }, [])
 
+  const handleYearChange = async (year: number) => {
+    setSelectedYear(year)
+    setSelectedWeek('01')
+    await handleWeekChange('01')
+  }
+
   const handleWeekChange = async (week: string) => {
+    const fullWeek = `${selectedYear}-${week}`
     setSelectedWeek(week)
-    await getEmails(week)
+    await getEmails(fullWeek)
   }
 
   const getExcel = async () => {
@@ -153,10 +176,14 @@ export function Dashboard() {
       console.log('Dados salvos com sucesso.')
       return true
     } catch (err) {
-      if (err.response?.status === 400 && err.response?.data?.message) {
-        console.log('Erro ao salvar os e-mails:', err.response.data.message)
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 400 && err.response?.data?.message) {
+          console.log('Erro ao salvar os e-mails:', err.response.data.message)
+        } else {
+          console.error('Erro inesperado ao salvar dados no banco:', err)
+        }
       } else {
-        console.error('Erro inesperado ao salvar dados no banco:', err)
+        console.error('Erro inesperado:', err)
       }
       return false
     }
@@ -197,6 +224,21 @@ export function Dashboard() {
     }
   }
 
+  // const getMonthlyEmailTotals = async () => {
+  //   try {
+  //     const response = await api.get('/api/emails/monthly-totals')
+
+  //     if (response.data) {
+  //       setChartData(response.data)
+  //     } else {
+  //       console.error('Nenhum dado encontrado para o gráfico.')
+  //       setChartData([])
+  //     }
+  //   } catch (err) {
+  //     console.error('Erro ao buscar os totais mensais de e-mails', err)
+  //   }
+  // }
+
   return (
     <>
       <Helmet title="Dashboard" />
@@ -208,21 +250,37 @@ export function Dashboard() {
 
           <div className="ml-auto gap-2 flex flex-row">
             <div className="flex items-center gap-3">
-              <AiReportButton />
+              {/* <AiReportButton /> */}
+
+              <Select
+                onValueChange={(value) => handleYearChange(Number(value))}
+                value={selectedYear.toString()}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 5 }, (_, i) => {
+                    const year = dayjs().year() - 2 + i
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+
               <Select onValueChange={handleWeekChange} value={selectedWeek}>
-                <SelectTrigger className="w-[170px]">
+                <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Semana" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 52 }, (_, i) => {
-                    const year = dayjs().year()
                     const week = String(i + 1).padStart(2, '0')
                     return (
-                      <SelectItem
-                        key={`${year}-${week}`}
-                        value={`${year}-${week}`}
-                      >
-                        {`${year} - Semana ${week}`}
+                      <SelectItem key={`${week}`} value={`${week}`}>
+                        {`Semana ${week}`}
                       </SelectItem>
                     )
                   })}
@@ -241,15 +299,82 @@ export function Dashboard() {
 
           <SummaryCard
             icon={<ListOrdered size={20} />}
-            title="Total de Pedidos de Abertura de processo"
+            title="Pedidos de Abertura de processo"
             amount={totalPedidoAberturaProcesso}
           />
 
           <SummaryCard
             icon={<ListOrdered size={20} />}
-            title="Total de Pedidos Tácitos"
+            title="Pedidos Tácitos"
             amount={totalPedidoTacito}
           />
+
+          {/* <div className="grid grid-cols-2 space-y-4">
+            <div className="grid col-span-2">
+              <SummaryCard
+                icon={<Mail size={20} />}
+                title="Total de e-mails respondidos"
+                amount={totalRespondido}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 col-span-2 gap-2">
+              <div>
+                <SummaryCard
+                  icon={<ListOrdered size={20} />}
+                  title="Pedidos de Abertura de processo"
+                  amount={totalPedidoAberturaProcesso}
+                />
+              </div>
+              <div>
+                <SummaryCard
+                  icon={<ListOrdered size={20} />}
+                  title="Pedidos Tácitos"
+                  amount={totalPedidoTacito}
+                />
+              </div>
+            </div>
+          </div> */}
+
+          {/* <div className="grid grid-cols-1">
+            <Card>
+              <CardContent>
+                {chartData.length > 0 ? (
+                  <ChartContainer config={chartConfig}>
+                    <BarChart
+                      accessibilityLayer
+                      data={chartData}
+                      margin={{ top: 40 }}
+                      className="fill-foreground"
+                    >
+                      <CartesianGrid vertical={false} horizontal={false} />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                        tickFormatter={(value) => value.slice(0, 3)}
+                      />
+                      <Bar dataKey="total" radius={4}>
+                        <LabelList
+                          position="top"
+                          className="fill-muted-foreground"
+                          offset={10}
+                          fontSize={12}
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-60">
+                    <p className="text-muted-foreground text-center">
+                      Nenhuma informação disponível para exibir no gráfico.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div> */}
         </div>
 
         <div className="grid gap-4">
@@ -258,7 +383,7 @@ export function Dashboard() {
               <div className="grid gap-2">
                 <CardTitle>E-mails</CardTitle>
                 <CardDescription>
-                  {`Últimos 10 e-mails respondidos na semana ${selectedWeek.split('-')[1]} de ${selectedWeek.split('-')[0]}.`}
+                  {`Últimos 10 e-mails respondidos na Semana ${selectedWeek} do ano ${selectedYear}.`}
                 </CardDescription>
               </div>
               <Button

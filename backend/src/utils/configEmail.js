@@ -1,6 +1,12 @@
 import nodemailer from "nodemailer";
 
-export const configEmail = async (sentFrom, sendTo, subject, message) => {
+export const configEmail = async (
+  sentFrom,
+  sendTo,
+  sendCopy,
+  subject,
+  message
+) => {
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
@@ -14,6 +20,7 @@ export const configEmail = async (sentFrom, sendTo, subject, message) => {
   const mailOptions = {
     from: sentFrom,
     to: sendTo,
+    cc: sendCopy,
     subject: subject,
     html: message,
   };

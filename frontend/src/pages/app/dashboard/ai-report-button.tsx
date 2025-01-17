@@ -1,4 +1,4 @@
-import { BotIcon } from 'lucide-react'
+import { BotIcon, DownloadIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -31,16 +31,43 @@ const AiReportButton = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [loading, setLoading] = useState(false)
 
+  const monthNames: { [key: string]: string } = {
+    '01': 'Janeiro',
+    '02': 'Fevereiro',
+    '03': 'Março',
+    '04': 'Abril',
+    '05': 'Maio',
+    '06': 'Junho',
+    '07': 'Julho',
+    '08': 'Agosto',
+    '09': 'Setembro',
+    '10': 'Outubro',
+    '11': 'Novembro',
+    '12': 'Dezembro',
+  }
+
   const loadReports = async (year: number) => {
     setLoading(true)
     try {
       const response = await api.get(`/api/reports/${year}`)
-      setReports(response.data.reports)
+      setReports(response.data || [])
     } catch (err) {
       console.error('Erro ao carregar relatórios', err)
+      setReports([])
     } finally {
       setLoading(false)
     }
+  }
+
+  const generateYears = (startYear: number, yearAhead: number) => {
+    const currentYear = new Date().getFullYear()
+    const years = []
+
+    for (let year = startYear; year <= currentYear + yearAhead; year++) {
+      years.push(year)
+    }
+
+    return years
   }
 
   useEffect(() => {
@@ -57,21 +84,26 @@ const AiReportButton = () => {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader className="mb-4">
-          <DialogTitle className="mb-3">Relatórios Mensais</DialogTitle>
+          <DialogTitle className="mb-2">Relatórios Mensais</DialogTitle>
           <DialogDescription>
-            Visualize e faça download dos relatórios mensais de e-mails gerados
-            pela IA do sistema.
+            Visualize e faça download dos relatórios mensais de e-mails.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-row items-center">
           <label className="text-sm font-semibold mr-2">Selecione o ano:</label>
-          <Select onValueChange={(value) => setSelectedYear(parseInt(value))}>
+          <Select
+            onValueChange={(value) => setSelectedYear(parseInt(value))}
+            defaultValue={String(selectedYear)}
+          >
             <SelectTrigger className="w-[170px]">
-              <SelectValue placeholder="Semana" />
+              <SelectValue placeholder="Ano" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="2025">2025</SelectItem>
-              <SelectItem value="2024">2024</SelectItem>
+              {generateYears(2025, 10).map((year) => (
+                <SelectItem key={year} value={String(year)}>
+                  {year}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -90,18 +122,20 @@ const AiReportButton = () => {
               {reports.length > 0 ? (
                 reports.map((report) => (
                   <tr key={report.month}>
-                    <td>{report.name}</td>
-                    <td>
+                    <td className="px-4 py-2 border text-center">
+                      {monthNames[report.month] || 'Mês Desconhecido'}
+                    </td>
+                    <td className="px-4 py-2 border text-center">
                       <Button
                         variant="ghost"
                         onClick={() =>
                           window.open(
-                            `/uploads/reports/${selectedYear}/${report.month}/${report.name}`,
+                            `/uploads/reports/${selectedYear}/${report.name}`,
                             '_blank',
                           )
                         }
                       >
-                        Download
+                        <DownloadIcon className="w-5 h-5" />
                       </Button>
                     </td>
                   </tr>

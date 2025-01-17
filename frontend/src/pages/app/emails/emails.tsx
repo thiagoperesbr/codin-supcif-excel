@@ -6,12 +6,14 @@ import { Pagination } from '@/components/pagination'
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
 import api from '@/config/api'
 
+import { EmailTableFilters } from './email-table-filters'
 import EmailsTableRow from './emails-table-row'
 
 interface Email {
@@ -36,29 +38,47 @@ interface Email {
 
 export function Emails() {
   const [emails, setEmails] = useState<Email[]>([])
+  const [filters, setFilters] = useState<Record<string, string>>({})
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
   const perPage = 25
 
-  const fetchEmails = async (pageIndex: number) => {
+  const fetchEmails = async () => {
     try {
-      const response = await api.get('/api/emails/', {
-        params: {
-          page: pageIndex,
-          limit: perPage,
-        },
+      const params = {
+        ...filters,
+        page: page > 0 ? (page + 1).toString() : '1',
+        limit: perPage.toString(),
+      }
+
+      const response = await api.get('/api/emails', {
+        params,
       })
 
       setEmails(response.data.emails)
       setTotalCount(response.data.totalCount)
     } catch (err) {
       console.error('Erro ao buscar emails', err)
+      setEmails([])
+      setTotalCount(0)
     }
   }
 
+  const handleFiltersUpdate = (newFilters: Record<string, string>) => {
+    setFilters(newFilters)
+    setPage(0)
+    console.log('Filtros atualizados:', newFilters)
+  }
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
+  }
+
   useEffect(() => {
-    fetchEmails(page)
-  }, [page])
+    console.log('Páginal atual:', page)
+    console.log('Filtros aplicados', filters)
+    fetchEmails()
+  }, [page, filters])
 
   return (
     <>
@@ -66,6 +86,8 @@ export function Emails() {
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Emails</h1>
         <div className="space-y-2.5">
+          <EmailTableFilters onFiltersUpdate={handleFiltersUpdate} />
+
           <div className="border rounded-md">
             <Table>
               <TableHeader>
@@ -81,23 +103,33 @@ export function Emails() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {emails.map((email) => (
-                  <EmailsTableRow
-                    key={email._id}
-                    emailID={email._id}
-                    dataSolicitacao={dayjs(email.dataSolicitacao).format(
-                      'DD/MM/YYYY',
-                    )}
-                    solicitacao={email.solicitacao}
-                    duvida={email.duvida}
-                    nomeEmpresa={email.nomeEmpresa}
-                    cnpj={email.cnpj}
-                    dataResposta={dayjs(email.dataResposta).format(
-                      'DD/MM/YYYY',
-                    )}
-                    processoSEI={email.processoSEI}
-                  />
-                ))}
+                {emails.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center">
+                      <strong>
+                        Nenhum e-mail encontrado com o filtro selecionado.
+                      </strong>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  emails.map((email) => (
+                    <EmailsTableRow
+                      key={email._id}
+                      emailID={email._id}
+                      dataSolicitacao={dayjs(email.dataSolicitacao).format(
+                        'DD/MM/YYYY',
+                      )}
+                      solicitacao={email.solicitacao}
+                      duvida={email.duvida}
+                      nomeEmpresa={email.nomeEmpresa}
+                      cnpj={email.cnpj}
+                      dataResposta={dayjs(email.dataResposta).format(
+                        'DD/MM/YYYY',
+                      )}
+                      processoSEI={email.processoSEI}
+                    />
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
@@ -106,7 +138,7 @@ export function Emails() {
             pageIndex={page}
             totalCount={totalCount}
             perPage={perPage}
-            onPageChange={(newPage) => setPage(newPage)}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>

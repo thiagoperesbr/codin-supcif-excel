@@ -7,9 +7,11 @@ import mongoose from "mongoose";
 
 import acompanhamentoRoute from "./routes/acompanhamentoRouter.js";
 import emailsRoute from "./routes/emailsRouter.js";
+import reportsRoute from "./routes/reportsRouter.js";
 
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import { enviarEmail } from "./utils/enviarEmail.js";
+import { automacao } from "./utils/automacao.js";
 import { generateMonthlyReport } from "./utils/generateMonthlyReport.js";
 
 dotenv.config();
@@ -23,29 +25,39 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     credentials: true,
   })
 );
 
 app.use("/api/acompanhamento/", acompanhamentoRoute);
 app.use("/api/emails/", emailsRoute);
+app.use("/api/reports/", reportsRoute);
 
 app.use(errorHandler);
 
-cron.schedule("0 10 * * 5", () => {
+cron.schedule("00 19 * * 5", () => {
+  automacao();
   enviarEmail();
 });
 
-cron.schedule("0 19 28-31 * * ", async () => {
-  const now = new Date();
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  if (now.getDate() === lastDay) {
-    try {
+cron.schedule("30 19 28-31 * *", async () => {
+  try {
+    const today = new Date();
+    const lastDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0
+    ).getDate();
+
+    if (today.getDate() === lastDayOfMonth) {
+      console.log("Gerando relatório mensal...");
       await generateMonthlyReport();
-    } catch (err) {
-      console.error("Erro ao gerar relatório mensal: ", err);
+    } else {
+      console.log("Hoje não é o último dia do mês.");
     }
+  } catch (err) {
+    console.error("Erro ao gerar relatório mensal: ", err);
   }
 });
 

@@ -10,8 +10,6 @@ import {
 } from '@/components/ui/navigation-menu'
 
 import { ThemeToggle } from '../theme/theme-toggle'
-// import { Input } from '../ui/input'
-// import { AccountMenu } from './account-menu'
 
 export function Header() {
   return (
@@ -38,18 +36,9 @@ export function Header() {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-        {/* <div className="relative mx-auto">
-          <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Procurar..."
-            className="w-[336px] rounded-lg pl-8"
-          />
-        </div> */}
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {/* <AccountMenu /> */}
         </div>
       </div>
     </div>

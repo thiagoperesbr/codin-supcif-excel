@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@react-pdf/renderer": "^4.1.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
@@ -23,6 +22,9 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
     "openai": "^4.77.0",
+    "pdfkit": "^0.15.2",
+    "puppeteer": "^23.11.1",
+    "smb2": "^0.2.11",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

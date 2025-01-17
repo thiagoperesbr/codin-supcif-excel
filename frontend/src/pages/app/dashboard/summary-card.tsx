@@ -10,13 +10,15 @@ interface SummaryCardProps {
 
 const SummaryCard = ({ icon, title, amount }: SummaryCardProps) => {
   return (
-    <Card>
-      <CardHeader className="flex-row items-center gap-4">
+    <Card className="h-full">
+      <CardHeader className="flex-row items-center gap-2">
         {icon}
         <p className="text-muted-foreground">{title}</p>
       </CardHeader>
       <CardContent>
-        <p className="text-4xl font-bold">{amount}</p>
+        <div className="flex justify-between">
+          <p className="text-4xl font-bold">{amount}</p>
+        </div>
       </CardContent>
     </Card>
   )

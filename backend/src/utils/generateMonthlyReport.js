@@ -138,7 +138,7 @@ export const generateMonthlyReport = async () => {
             {
               type: "text",
               content:
-                "Você é um Assessor que trabalha no setor de Concessão de Incentivos Fiscais. Estou aqui para te ajudar a gerar um relatório mensal de e-mails recebidos e respondidos pela sua equipe, de acordo com algumas métricas pré-definidas. Você precisa gerar um relatório com insights sobre o volume de e-mails recebidos, respondidos, tempo médio de resposta, taxa de crescimento, categorias, dúvidas mais recorrentes, setores mais envolvidos, empresas com maior frequência, origens dos e-mails e leis e decretos mais citados.",
+                "Você é um Assessor que trabalha no setor de Concessão de Incentivos Fiscais. Você irá gerar um relatório mensal de e-mails recebidos e respondidos pela sua equipe, de acordo com algumas métricas pré-definidas. Você precisa gerar um relatório com insights sobre o volume de e-mails recebidos, respondidos, tempo médio de resposta, taxa de crescimento, categorias, dúvidas mais recorrentes, setores mais envolvidos, empresas com maior frequência, origens dos e-mails e leis e decretos mais citados. Você deve incluir no relatório sua análise e consideração, e depois recomendações baseadas das  métricas. No Final do relatório, você deve incluir um gráfico comparativo entre o mês atual e o mês anterior.",
             },
           ],
         },
@@ -158,6 +158,6 @@ export const generateMonthlyReport = async () => {
 
     console.log("Relatório gerado e salvo com sucesso!");
   } catch (err) {
-    next(err);
+    console.log("Erro ao gerar relatório mensal: ", err);
   }
 };
