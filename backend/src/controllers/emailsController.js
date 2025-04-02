@@ -58,8 +58,6 @@ export const createEmails = async (req, res, next) => {
 };
 
 export const getEmails = async (req, res, next) => {
-  console.log("Iniciando...");
-
   try {
     const { page, limit, cnpj, tipo, dataSolicitacao, dataResposta } =
       req.query;
@@ -150,11 +148,15 @@ export const getLatestEmails = async (req, res, next) => {
       countsBySolicitacao.find((item) => item._id === "Pedido Tácito")?.count ||
       0;
 
+    const countPedidoReexame =
+      countsBySolicitacao.find((item) => item._id === "Reexame")?.count || 0;
+
     res.status(200).json({
       emails: emails.reverse(),
       totalCount: totalEmailsCount,
       countPedidoAberturaProcesso,
       countPedidoTacito,
+      countPedidoReexame,
     });
   } catch (err) {
     next(err);

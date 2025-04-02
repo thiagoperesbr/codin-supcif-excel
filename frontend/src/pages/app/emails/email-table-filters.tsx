@@ -123,6 +123,7 @@ export function EmailTableFilters({
             <SelectItem value="Pedido de Abertura de processo">
               Pedido de abertura de processo
             </SelectItem>
+            <SelectItem value="Reexame">Reexame</SelectItem>
           </SelectContent>
         </Select>
 

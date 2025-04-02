@@ -41,25 +41,25 @@ cron.schedule("00 19 * * 5", () => {
   enviarEmail();
 });
 
-cron.schedule("30 19 28-31 * *", async () => {
-  try {
-    const today = new Date();
-    const lastDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0
-    ).getDate();
+// cron.schedule("30 19 28-31 * *", async () => {
+//   try {
+//     const today = new Date();
+//     const lastDayOfMonth = new Date(
+//       today.getFullYear(),
+//       today.getMonth() + 1,
+//       0
+//     ).getDate();
 
-    if (today.getDate() === lastDayOfMonth) {
-      console.log("Gerando relatório mensal...");
-      await generateMonthlyReport();
-    } else {
-      console.log("Hoje não é o último dia do mês.");
-    }
-  } catch (err) {
-    console.error("Erro ao gerar relatório mensal: ", err);
-  }
-});
+//     if (today.getDate() === lastDayOfMonth) {
+//       console.log("Gerando relatório mensal...");
+//       await generateMonthlyReport();
+//     } else {
+//       console.log("Hoje não é o último dia do mês.");
+//     }
+//   } catch (err) {
+//     console.error("Erro ao gerar relatório mensal: ", err);
+//   }
+// });
 
 mongoose
   .connect(process.env.MONGODB_URL)

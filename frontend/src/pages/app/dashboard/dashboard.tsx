@@ -57,21 +57,13 @@ interface Email {
 
 dayjs.extend(weekOfYear)
 
-// const chartConfig = {
-//   total: {
-//     label: 'Total',
-//   },
-// } satisfies ChartConfig
-
 export function Dashboard() {
   const [emails, setEmails] = useState<Email[]>([])
-  // const [chartData, setChartData] = useState<
-  //   { month: string; total: number }[]
-  // >([])
   const [totalRespondido, setTotalRespondido] = useState('0')
   const [totalPedidoAberturaProcesso, setTotalPedidoAberturaProcesso] =
     useState('0')
   const [totalPedidoTacito, setTotalPedidoTacito] = useState('0')
+  const [totalPedidoReexame, setTotalPedidoReexame] = useState('0')
   const [noData, setNoData] = useState(false)
   const [selectedYear, setSelectedYear] = useState<number>(dayjs().year())
   const [selectedWeek, setSelectedWeek] = useState<string>('01')
@@ -105,7 +97,7 @@ export function Dashboard() {
     let isMounted = true
 
     const initializeDashboard = async () => {
-      const isFriday = dayjs().day() === 6
+      const isFriday = dayjs().day() === 5
       const targetWeek = calculateTargetWeek()
       const [targetYear, targetWeekNumber] = targetWeek.split('-')
       setSelectedYear(Number(targetYear))
@@ -119,16 +111,13 @@ export function Dashboard() {
 
           if (saveSuccess && isMounted) {
             await getEmails(targetWeek)
-            // await getMonthlyEmailTotals()
           } else if (isMounted) {
             console.log('Nenhum e-mail foi salvo. Atualizando a lista.')
             await getEmails(targetWeek)
-            // await getMonthlyEmailTotals()
           }
         }
       } else if (isMounted) {
         await getEmails(targetWeek)
-        // await getMonthlyEmailTotals()
       }
     }
 
@@ -173,7 +162,6 @@ export function Dashboard() {
         emails: emailsToSave,
       })
 
-      console.log('Dados salvos com sucesso.')
       return true
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -200,19 +188,21 @@ export function Dashboard() {
         const totalCount = response.data.totalCount
         const pedidoAberturaProcesso = response.data.countPedidoAberturaProcesso
         const pedidoTacito = response.data.countPedidoTacito
+        const pedidoReexame = response.data.countPedidoReexame
 
         setEmails(emailData)
         setNoData(false)
         setTotalRespondido(totalCount || '0')
-        setTotalPedidoAberturaProcesso(pedidoAberturaProcesso)
-        setTotalPedidoTacito(pedidoTacito)
+        setTotalPedidoAberturaProcesso(pedidoAberturaProcesso || '0')
+        setTotalPedidoTacito(pedidoTacito || '0')
+        setTotalPedidoReexame(pedidoReexame || '0')
       } else {
         setEmails([])
         setNoData(true)
         setTotalRespondido('0')
         setTotalPedidoAberturaProcesso('0')
         setTotalPedidoTacito('0')
-        console.log('Nenhum dado de e-mail econtrado no banco.')
+        setTotalPedidoReexame('0')
       }
     } catch (err) {
       setEmails([])
@@ -220,24 +210,10 @@ export function Dashboard() {
       setTotalRespondido('0')
       setTotalPedidoAberturaProcesso('0')
       setTotalPedidoTacito('0')
+      setTotalPedidoReexame('0')
       console.error('Erro ao buscar dados do banco.', err)
     }
   }
-
-  // const getMonthlyEmailTotals = async () => {
-  //   try {
-  //     const response = await api.get('/api/emails/monthly-totals')
-
-  //     if (response.data) {
-  //       setChartData(response.data)
-  //     } else {
-  //       console.error('Nenhum dado encontrado para o gráfico.')
-  //       setChartData([])
-  //     }
-  //   } catch (err) {
-  //     console.error('Erro ao buscar os totais mensais de e-mails', err)
-  //   }
-  // }
 
   return (
     <>
@@ -290,7 +266,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <SummaryCard
             icon={<Mail size={20} />}
             title="Total de e-mails respondidos"
@@ -309,72 +285,11 @@ export function Dashboard() {
             amount={totalPedidoTacito}
           />
 
-          {/* <div className="grid grid-cols-2 space-y-4">
-            <div className="grid col-span-2">
-              <SummaryCard
-                icon={<Mail size={20} />}
-                title="Total de e-mails respondidos"
-                amount={totalRespondido}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 col-span-2 gap-2">
-              <div>
-                <SummaryCard
-                  icon={<ListOrdered size={20} />}
-                  title="Pedidos de Abertura de processo"
-                  amount={totalPedidoAberturaProcesso}
-                />
-              </div>
-              <div>
-                <SummaryCard
-                  icon={<ListOrdered size={20} />}
-                  title="Pedidos Tácitos"
-                  amount={totalPedidoTacito}
-                />
-              </div>
-            </div>
-          </div> */}
-
-          {/* <div className="grid grid-cols-1">
-            <Card>
-              <CardContent>
-                {chartData.length > 0 ? (
-                  <ChartContainer config={chartConfig}>
-                    <BarChart
-                      accessibilityLayer
-                      data={chartData}
-                      margin={{ top: 40 }}
-                      className="fill-foreground"
-                    >
-                      <CartesianGrid vertical={false} horizontal={false} />
-                      <XAxis
-                        dataKey="month"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                        tickFormatter={(value) => value.slice(0, 3)}
-                      />
-                      <Bar dataKey="total" radius={4}>
-                        <LabelList
-                          position="top"
-                          className="fill-muted-foreground"
-                          offset={10}
-                          fontSize={12}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ChartContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-60">
-                    <p className="text-muted-foreground text-center">
-                      Nenhuma informação disponível para exibir no gráfico.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div> */}
+          <SummaryCard
+            icon={<ListOrdered size={20} />}
+            title="Pedidos de Reexame"
+            amount={totalPedidoReexame}
+          />
         </div>
 
         <div className="grid gap-4">

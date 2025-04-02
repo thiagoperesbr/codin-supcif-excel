@@ -6,7 +6,7 @@ export async function enviarEmail() {
     const sendTo = "fabio@codin.rj.gov.br";
     const sendCopy = [
       "bmoreira@codin.rj.gov.br",
-      "vnascimento@codin.rj.gov.br",
+      "mgomes@codin.rj.gov.br",
       "rcoelho@codin.rj.gov.br",
       "mjardim@codin.rj.gov.br",
       "tperes@codin.rj.gov.br",

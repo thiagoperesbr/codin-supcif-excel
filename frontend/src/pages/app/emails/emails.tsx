@@ -67,16 +67,9 @@ export function Emails() {
   const handleFiltersUpdate = (newFilters: Record<string, string>) => {
     setFilters(newFilters)
     setPage(0)
-    console.log('Filtros atualizados:', newFilters)
-  }
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
   }
 
   useEffect(() => {
-    console.log('Páginal atual:', page)
-    console.log('Filtros aplicados', filters)
     fetchEmails()
   }, [page, filters])
 
@@ -138,7 +131,7 @@ export function Emails() {
             pageIndex={page}
             totalCount={totalCount}
             perPage={perPage}
-            onPageChange={handlePageChange}
+            onPageChange={(newPage: number) => setPage(newPage)}
           />
         </div>
       </div>
